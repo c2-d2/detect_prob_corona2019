@@ -1,3 +1,45 @@
+# libraries
+library(tidyverse)
+library(doParallel)
+pkgs <- c('doParallel', 'foreach')
+lapply(pkgs, require, character.only = T)
+registerDoParallel(cores = 4)
+library(rstan)
+library(bayesplot)
+rstan_options(auto_write = TRUE)
+
+
+# functions
+# inspired by: https://stackoverflow.com/questions/17922637/prediction-intervals-for-poisson-regression-on-r
+boot_pi <- function(model, pdata, n, p) {
+                odata <- model$data
+                lp <- (1 - p) / 2
+                up <- 1 - lp
+                set.seed(2020)
+                seeds <- round(runif(n, 1, 1000), 0)
+                boot_y <- foreach(i = 1:n, .combine = rbind) %dopar% {
+                                set.seed(seeds[i])
+                                bdata <- odata[sample(seq(nrow(odata)), size = nrow(odata), replace = TRUE), ]
+                                bpred <- predict(update(model, data = bdata), type = "response", newdata = pdata)
+                                rpois(length(bpred), lambda = bpred)
+                }
+                boot_ci <- t(apply(boot_y, 2, quantile, c(lp, up)))
+                return(data.frame(pred = predict(model, newdata = pdata, type = "response"), lower = boot_ci[, 1], upper = boot_ci[, 2]))
+}
+
+plot_case_vol <- function( PI, df ) {
+                p1 <- PI %>% as_tibble() %>% mutate(Cases_real=df$Cases, 
+                                                    Air_travel_volume=df$Wuhan_airtravel,
+                                                    Country=df$Country) %>% 
+                                ggplot( aes(x=Air_travel_volume) ) +
+                                geom_point( aes(y=Cases_real), size=1.2 ) +
+                                geom_line( aes(y=pred), linetype=2 ) +
+                                geom_ribbon(aes(ymin=lower,ymax=upper), alpha=0.3 ) +
+                                theme(panel.grid.minor = element_blank()) +
+                                labs(y="")
+                return(p1)
+}
+
 # load data for cases + flight volume
 load(file="~/Desktop/Corona/epidata.Rdata") # 30
 df_fix <- df %>% left_join( tibble(Country_new=c("United States", # 30 x 3
