@@ -76,9 +76,10 @@ df_ghs <- read_csv(file="~/Desktop/Corona/ghs_index.csv",col_names = F) %>%
                 rename(Country=X1,ghs=X2) 
 # bind datasets 
 df_all0 <- full_join( df_ghs,df_r2, by="Country" ) %>% mutate( Cases_lm=replace_na(Cases_lm,replace=0),
-                                                            Wuhan_airtravel=replace_na(Wuhan_airtravel,replace=0))  
+                                                               Wuhan_airtravel=replace_na(Wuhan_airtravel,replace=0))  
+df_all0 <- df_all0 %>% filter( Country!="China") # filter out epidmic origin  
                                                             
-                                                            # settings
+# settings
 min_airtravel <- 1.5 
 ghs_quantile_1 <- 1/3
 ghs_quantile_2 <- 2/3
