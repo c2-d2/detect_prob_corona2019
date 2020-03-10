@@ -1,0 +1,29 @@
+\documentclass{article}
+\usepackage[utf8]{inputenc}
+
+\title{A-level notes}
+\author{Aimee R. Taylor}
+\date{February 2020}
+
+\usepackage{natbib}
+\usepackage{graphicx}
+\usepackage{amsmath} % for dfrac
+\usepackage{amssymb} % for mathbb
+\usepackage{mathabx} % for widebar
+\usepackage[margin=1in]{geometry} % for margin size
+
+\begin{document}
+
+\begin{align}
+Y_i &\sim \mathcal{P}\text{oisson}(\lambda_i), \\
+ \lambda_i &= 
+\begin{cases}
+\beta x_i \text{ if } i = 1, \\
+\beta x_i \theta_{\text{level}[i]} \text{ otherwise}, 
+\end{cases} \\
+\theta_{\text{level}[i]} &\sim \mathcal{U}\text{niform}(0,1), \\
+\log(\beta) &\sim \mathcal{N}\text{ormal}(0, 50), \\
+\theta_{\text{global}} &= \dfrac{1}{n \sum_{i = 2}^n x_i} \sum_{i = 2}^n x_i \theta_{\text{level}[i]}, 
+\end{align}
+
+\end{document}
