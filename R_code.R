@@ -158,4 +158,42 @@ mcmc_areas(
                       axis.line.y=element_blank(),
                       panel.grid.major.x = element_line(linetype=2, color="lightgrey"))
 
+# make supplementary Table 1
+df_non_sing <- df_fit %>% 
+                select( Country,ghs_high,Wuhan_airtravel,Cases_lm) %>% 
+                mutate( Wuhan_airtravel=ifelse(Wuhan_airtravel>0,"Top 27","Lower 167") ) %>% 
+                mutate( ghs_high=ifelse(ghs_high==2,"high",
+                                        ifelse(ghs_high==3,"medium","low") ) ) %>% 
+                filter(Country!="Singapore")
+df_sing <- df_fit %>% 
+                select( Country,ghs_high,Wuhan_airtravel,Cases_lm) %>% 
+                mutate( Wuhan_airtravel=ifelse(Wuhan_airtravel>0,"Top 27","Lower 167") ) %>% 
+                mutate( ghs_high=ifelse(ghs_high==2,"high",
+                                        ifelse(ghs_high==3,"medium","low") ) ) %>% 
+                filter(Country=="Singapore")
+bind_rows(df_sing,df_non_sing) %>% rename(`GHS surveillance capacity`=ghs_high,
+                                          `Flight connectivity to Wuhan`=Wuhan_airtravel,
+                                          `Imported and reported cases`=Cases_lm) %>% 
+                mutate( `GHS surveillance capacity`=ifelse(Country=="Singapore","best",
+                                                           `GHS surveillance capacity` ) ) %>% 
+                mutate( i=1:n() ) %>% 
+                write_csv("~/Desktop/Corona/Out/Suppl_tabl_ghs.csv")
+
+
+# locations with connectivity and medium/low surveillance
+df_fit %>% 
+                filter(Wuhan_airtravel>0 & ghs_high%in%c(4,3)) %>% 
+                select(Country)
+
+
+###################### smaller calculations #############################
+# compute the duration in which cases might have been exported from Wuhan
+library(lubridate)
+dmy("8-12-2019") - dmy("4-2-2020") # 58 days
+1/(31 * 58)
             
+# 9 locations with over 500 cases
+dfr %>% filter(Country%in% c("South Korea","Iran","Italy","Japan","France","Germany","Spain","Singapore","United States")) %>% nrow() # 8 countries with top 27 
+# all but Iran
+# what are the odds of 7of8 top connection or more (8of8)
+(27/194)^7 * (1-27/194) + (27/194)^8 # 1.011426e-06
