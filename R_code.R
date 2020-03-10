@@ -158,6 +158,15 @@ mcmc_areas(
                       axis.line.y=element_blank(),
                       panel.grid.major.x = element_line(linetype=2, color="lightgrey"))
 
+# extract posteriors
+m00@model_pars
+m00 %>% as.data.frame(pars=c("c_weighted","c_high","c_med","c_low")) %>% as_tibble() %>% 
+                rename(theta_global=c_weighted,
+                       theta_high=c_high,
+                       theta_med=c_med,
+                       theta_low=c_low) %>% sample_n(size=1000) %>% write_csv(path="~/Desktop/Corona/Out/theta_all_post1000.csv")
+
+
 # make supplementary Table 1
 df_non_sing <- df_fit %>% 
                 select( Country,ghs_high,Wuhan_airtravel,Cases_lm) %>% 
